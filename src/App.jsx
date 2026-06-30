@@ -165,7 +165,7 @@ function BrandShowcase() {
     <section className="brand-showcase single-brand" aria-label="Casarte 品牌">
       <div className="casarte-lockup">
         <div className="logo-line">
-          <img src="/brand/casarte-logo.svg" alt="Casarte" />
+          <img src={`${import.meta.env.BASE_URL}brand/casarte-logo.svg`} alt="Casarte" />
           <b>供应链生产日清驾驶舱</b>
         </div>
         <span>高端厨电制造驾驶舱</span>
