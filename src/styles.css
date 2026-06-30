@@ -1473,6 +1473,60 @@ table {
   border-style: dashed;
 }
 
+.factory-summary-strip {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 8px;
+  margin: 8px 0 12px;
+}
+
+.factory-summary-pill {
+  position: relative;
+  min-height: 86px;
+  padding: 10px 11px;
+  overflow: hidden;
+  text-align: left;
+  color: var(--text);
+  border: 1px solid rgba(91, 177, 255, 0.22);
+  border-radius: 7px;
+  background:
+    linear-gradient(145deg, rgba(5, 18, 34, 0.94), rgba(13, 48, 76, 0.58)),
+    repeating-linear-gradient(90deg, rgba(57, 200, 255, 0.045) 0 1px, transparent 1px 14px);
+  box-shadow: inset 0 0 18px rgba(57, 200, 255, 0.06);
+}
+
+.factory-summary-pill::after {
+  position: absolute;
+  right: -20px;
+  top: -22px;
+  width: 62px;
+  height: 62px;
+  border: 1px solid rgba(57, 200, 255, 0.22);
+  border-radius: 50%;
+  content: "";
+}
+
+.factory-summary-pill span,
+.factory-summary-pill i {
+  display: block;
+  color: var(--muted);
+  font-size: 11px;
+  font-style: normal;
+  line-height: 1.35;
+}
+
+.factory-summary-pill strong {
+  display: block;
+  margin: 6px 0 4px;
+  color: #fff;
+  font-size: 21px;
+  line-height: 1;
+}
+
+.factory-summary-pill.danger strong { color: var(--red); }
+.factory-summary-pill.warn strong { color: var(--amber); }
+.factory-summary-pill.good strong { color: var(--green); }
+
 .factory-stage {
   position: relative;
   overflow: hidden;
@@ -1668,7 +1722,12 @@ table {
     grid-template-columns: repeat(4, minmax(0, 1fr));
   }
 
+  .factory-summary-strip {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
   .factory-line-cloud,
+  .factory-summary-strip,
   .narrative-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }

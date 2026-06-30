@@ -109,6 +109,31 @@ const factoryPerformance = [
   { name: "巴基斯坦", targetWan: 0, actualWan: 0, gapWan: 0, complete: 0, dayTarget: 0, dayActual: 0, dayGap: 0, shortage: 0, status: "预留", lines: [], tone: "empty", pending: true },
 ];
 
+const dailyPerformanceRows = [
+  ...lineRows,
+  { factory: "黄岛烟机", line: "烟机小计", orderTarget: 115000, orderActual: 103571, orderGap: 11429, target: 3600, actual: 3463, gap: 137, shortageToday: 0, shortageTotal: 0, planRate: "96%", outputs: [4350, 0, 2950, 2691, 1263, 1184, 2353, 3040, 1806, 2845], subtotal: true },
+  { factory: "黄岛烤箱", line: "烤箱线-白班", orderTarget: 25000, orderActual: 23620, orderGap: 1380, target: 850, actual: 781, gap: 69, shortageToday: 0, shortageTotal: 69, planRate: "70%", outputs: [264, 0, 413, 450, 434, 446, 0, 0, 0, 0] },
+  { factory: "黄岛烤箱", line: "烤箱线-夜班", orderTarget: 25000, orderActual: 23620, orderGap: 1380, target: 850, actual: 781, gap: 69, shortageToday: 0, shortageTotal: 69, planRate: "70%", outputs: [0, 0, 900, 892, 319, 395, 0, 0, 0, 0] },
+  { factory: "黄岛烤箱", line: "烤箱小计", orderTarget: 25000, orderActual: 23620, orderGap: 1380, target: 1700, actual: 1562, gap: 138, shortageToday: 0, shortageTotal: 138, planRate: "70%", outputs: [264, 0, 1313, 1342, 753, 841, 0, 0, 0, 0], subtotal: true },
+  { factory: "烟台厨电", line: "厨电小计", orderTarget: 159000, orderActual: 152000, orderGap: 7000, target: 5200, actual: 4864, gap: 336, shortageToday: 0, shortageTotal: 0, planRate: "96%", outputs: [11000, 0, 3960, 5483, 4842, 4891, 0, 0, 0, 0], subtotal: true },
+  { factory: "烟台厨电", line: "灶具B线", orderTarget: 159000, orderActual: 152000, orderGap: 7000, target: 2600, actual: 2428, gap: 172, shortageToday: 0, shortageTotal: 0, planRate: "96%", outputs: [2300, 0, 1270, 2600, 2142, 2200, 0, 0, 0, 0] },
+  { factory: "烟台厨电", line: "灶具自动化线", orderTarget: 159000, orderActual: 152000, orderGap: 7000, target: 2600, actual: 2436, gap: 164, shortageToday: 0, shortageTotal: 0, planRate: "96%", outputs: [5000, 0, 0, 0, 0, 0, 0, 0, 0, 0] },
+  { factory: "重庆厨电", line: "洗碗机A线", orderTarget: 36000, orderActual: 33200, orderGap: 2800, target: 900, actual: 835, gap: 65, shortageToday: 0, shortageTotal: 0, planRate: "92%", outputs: [0, 0, 803, 900, 880, 842, 0, 0, 0, 0] },
+  { factory: "重庆厨电", line: "灶具线", orderTarget: 36000, orderActual: 33200, orderGap: 2800, target: 900, actual: 835, gap: 65, shortageToday: 0, shortageTotal: 0, planRate: "92%", outputs: [0, 0, 982, 760, 960, 880, 0, 0, 0, 0] },
+  { factory: "重庆厨电", line: "重庆厨电小计", orderTarget: 36000, orderActual: 33200, orderGap: 2800, target: 1800, actual: 1670, gap: 130, shortageToday: 0, shortageTotal: 0, planRate: "92%", outputs: [0, 0, 1785, 1660, 1840, 1722, 0, 0, 0, 0], subtotal: true },
+];
+
+const factoryOrder = new Map(factoryPerformance.map((factory, index) => [factory.name, index]));
+
+function sortDailyRows(rows) {
+  return [...rows].sort((a, b) => {
+    if (a.subtotal !== b.subtotal) return a.subtotal ? -1 : 1;
+    const factoryDelta = (factoryOrder.get(a.factory) ?? 99) - (factoryOrder.get(b.factory) ?? 99);
+    if (factoryDelta !== 0) return factoryDelta;
+    return Math.abs(b.gap || 0) - Math.abs(a.gap || 0);
+  });
+}
+
 function varianceTone(value) {
   if (value > 100) return "danger";
   if (value > 0) return "warn";
@@ -235,10 +260,11 @@ function OverviewPage({ setActiveTab, selectedLine, setSelectedLine }) {
               <div className="panel-head">
                 <div>
                   <h2>日绩效只是其中一块</h2>
-                  <p>这里给汇总结论，点击进入日报线体明细。</p>
+                  <p>外层先按工厂看，黄岛、烟台、重庆全部露出；点击进入日报线体明细。</p>
                 </div>
                 <button className="ghost-link" onClick={() => setActiveTab("daily")}>进入日绩效 <CaretRight /></button>
               </div>
+              <FactorySummaryStrip setActiveTab={setActiveTab} />
               <VarianceMatrix selected={selectedLine} onSelect={setSelectedLine} compact />
             </section>
             <ActionBoard />
@@ -291,6 +317,20 @@ function ModuleCards({ setActiveTab }) {
   );
 }
 
+function FactorySummaryStrip({ setActiveTab }) {
+  return (
+    <div className="factory-summary-strip">
+      {factoryPerformance.slice(0, 5).map((factory) => (
+        <button key={factory.name} className={`factory-summary-pill ${factory.tone}`} onClick={() => setActiveTab("daily")}>
+          <span>{factory.name}</span>
+          <strong>{factory.actualWan.toFixed(2)}万</strong>
+          <i>差异 {factory.gapWan.toFixed(2)}万 / 日差 {factory.dayGap}台</i>
+        </button>
+      ))}
+    </div>
+  );
+}
+
 function ActionBoard() {
   return (
     <aside className="panel action-board">
@@ -318,7 +358,7 @@ function ActionBoard() {
 }
 
 function RankingPanel({ selected, onSelect }) {
-  const sorted = [...lineRows].filter((row) => !row.subtotal).sort((a, b) => b.gap - a.gap);
+  const sorted = [...dailyPerformanceRows].filter((row) => !row.subtotal).sort((a, b) => b.gap - a.gap);
   const maxGap = Math.max(...sorted.map((row) => Math.abs(row.gap)));
   return (
     <section className="panel ranking-panel">
@@ -350,11 +390,11 @@ function RankingPanel({ selected, onSelect }) {
 
 function VarianceMatrix({ selected, onSelect, compact = false }) {
   const [filter, setFilter] = useState("all");
-  const visibleRows = lineRows.filter((row) => {
+  const visibleRows = sortDailyRows(dailyPerformanceRows.filter((row) => {
     if (filter === "variance") return Math.abs(row.gap) > 0 || Math.abs(row.orderGap || 0) > 0;
     if (filter === "shortage") return row.shortageToday || row.shortageTotal;
     return true;
-  });
+  }));
 
   return (
     <section className={compact ? "matrix-embed" : "panel matrix-panel"}>
@@ -485,7 +525,7 @@ function DailyPage({ selectedLine, setSelectedLine, setActiveTab }) {
             <p>目标43万，已下线40.2万，完成率93%；T-1计划15109台，实际14670台，累计欠产502台。</p>
           </div>
           <div className="summary-badges">
-            {[...lineRows].filter((row) => !row.subtotal).sort((a, b) => b.gap - a.gap).slice(0, 4).map((row) => (
+            {[...dailyPerformanceRows].filter((row) => !row.subtotal).sort((a, b) => b.gap - a.gap).slice(0, 4).map((row) => (
               <span key={row.line}>{row.line} {row.gap > 0 ? "+" : ""}{row.gap}</span>
             ))}
           </div>
@@ -539,8 +579,8 @@ function FactoryPerformanceDock({ selectedFactory, onSelectFactory }) {
 }
 
 function FactoryDetailStage({ factory, selectedLine, setSelectedLine }) {
-  const relatedLines = lineRows.filter((row) => row.factory === factory.name || factory.lines.includes(row.line));
-  const lines = relatedLines.length ? relatedLines : lineRows.slice(0, 4);
+  const relatedLines = dailyPerformanceRows.filter((row) => row.factory === factory.name || factory.lines.includes(row.line));
+  const lines = relatedLines.length ? relatedLines : dailyPerformanceRows.slice(0, 4);
   return (
     <section className={`panel factory-stage ${factory.pending ? "pending" : ""}`} key={factory.name}>
       <div className="stage-header">
@@ -712,7 +752,7 @@ function DailyLedger({ selectedLine }) {
             <tr><th>工厂</th><th>线体</th><th>订单目标</th><th>累计实际</th><th>订单差异</th><th>日产目标</th><th>日产实际</th><th>日产差异</th><th>当日欠产</th><th>累计欠产</th><th>清单率</th></tr>
           </thead>
           <tbody>
-            {lineRows.map((row) => (
+            {sortDailyRows(dailyPerformanceRows).map((row) => (
               <tr key={`${row.factory}-${row.line}`}>
                 <td>{row.factory}</td><td>{row.line}</td><td>{row.orderTarget || "-"}</td><td>{row.orderActual || "-"}</td><td className={varianceTone(row.orderGap)}>{row.orderGap || "-"}</td><td>{row.target}</td><td>{row.actual}</td><td className={varianceTone(row.gap)}>{row.gap > 0 ? "+" : ""}{row.gap}</td><td>{row.shortageToday || "-"}</td><td>{row.shortageTotal || "-"}</td><td>{row.planRate}</td>
               </tr>
@@ -859,7 +899,7 @@ function RawLedgerTable({ title, ledger }) {
 
 export function App() {
   const [activeTab, setActiveTab] = useState("overview");
-  const [selectedLine, setSelectedLine] = useState(lineRows[1]);
+  const [selectedLine, setSelectedLine] = useState(dailyPerformanceRows[1]);
   const [uploadInfo, setUploadInfo] = useState({
     file: "最近上传：生产日清-6.30.xlsx",
     status: "已接入全部Sheet · 上传同模板后替换全驾驶舱数据",
