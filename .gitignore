@@ -3,6 +3,7 @@ dist/
 .npm-cache/
 .playwright-cli/
 output/
+.publish-gh-pages/
 .npmrc
 public/brand/casarte-raw/
 *.log
