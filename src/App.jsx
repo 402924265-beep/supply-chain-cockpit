@@ -29,43 +29,18 @@ import {
   WarningCircle,
 } from "@phosphor-icons/react";
 import rawLedgers from "./workbook-ledgers.json";
+import dashboardData from "./dashboard-data.json";
 
-const dates = ["6.18", "6.21", "6.22", "6.23", "6.24", "6.25", "6.26", "6.27", "6.28", "6.29"];
+const dates = dashboardData.dates;
 
-const summaryKpis = [
-  { label: "6月挑战目标", value: "43.0万", sub: "同期32万，预算增幅30%", tone: "blue", icon: Target },
-  { label: "截至6月29日下线", value: "40.2万", sub: "目标完成率 93%", tone: "green", icon: CheckCircle },
-  { label: "目标差异", value: "2.96万", sub: "距月度目标差额", tone: "red", icon: Gauge },
-  { label: "T-1计划 / 实际", value: "1.51万 / 1.47万", sub: "昨日累计欠产502台", tone: "amber", icon: CalendarCheck },
-  { label: "黄岛洗碗机欠产", value: "0.04万", sub: "364台，清单率62%", tone: "red", icon: WarningCircle },
-  { label: "烤箱欠产", value: "0.01万", sub: "138台，清单率70%", tone: "red", icon: ShieldWarning },
-];
+const iconByKey = { Target, CheckCircle, Gauge, CalendarCheck, Package, WarningCircle, ShieldWarning };
+const summaryKpis = dashboardData.summaryKpis.map((item) => ({ ...item, icon: iconByKey[item.icon] || Target }));
 
-const lineRows = [
-  { factory: "黄岛洗碗机", line: "H20线", orderTarget: 95000, orderActual: 82601, orderGap: 12399, target: 1300, actual: 1166, gap: 134, shortageToday: 2, shortageTotal: 37, planRate: "62%", outputs: [1213, 600, 777, 1059, 1301, 1238, 1316, 1201, 1046, 470] },
-  { factory: "黄岛洗碗机", line: "H10线", orderTarget: 95000, orderActual: 82601, orderGap: 12399, target: 1000, actual: 853, gap: 147, shortageToday: 0, shortageTotal: 311, planRate: "62%", outputs: [912, 601, 662, 597, 671, 738, 715, 848, 846, 788] },
-  { factory: "黄岛洗碗机", line: "新班次", orderTarget: 95000, orderActual: 82601, orderGap: 12399, target: 500, actual: 507, gap: -7, shortageToday: 0, shortageTotal: 0, planRate: "62%", outputs: [450, 439, 434, 596, 486, 558, 692, 657, 866, 540] },
-  { factory: "黄岛洗碗机", line: "GE线", orderTarget: 95000, orderActual: 82601, orderGap: 12399, target: 600, actual: 543, gap: 57, shortageToday: 0, shortageTotal: 16, planRate: "62%", outputs: [343, 450, 617, 715, 693, 390, 465, 695, 808, 654] },
-  { factory: "黄岛洗碗机", line: "抽屉线", orderTarget: 95000, orderActual: 82601, orderGap: 12399, target: 200, actual: 157, gap: 43, shortageToday: 0, shortageTotal: 0, planRate: "62%", outputs: [231, 0, 161, 130, 0, 0, 126, 0, 20, 12] },
-  { factory: "黄岛洗碗机", line: "洗碗机小计", orderTarget: 95000, orderActual: 82601, orderGap: 12399, target: 3600, actual: 3304, gap: 296, shortageToday: 2, shortageTotal: 364, planRate: "62%", outputs: [3149, 2090, 2651, 3097, 3151, 2924, 3314, 3401, 3586, 2464], subtotal: true },
-  { factory: "黄岛烟机", line: "总装A线", orderTarget: 115000, orderActual: 103571, orderGap: 11429, target: 600, actual: 466, gap: 134, shortageToday: 0, shortageTotal: 0, planRate: "96%", outputs: [858, 0, 0, 0, 0, 2, 320, 350, 300, 453] },
-  { factory: "黄岛烟机", line: "总装B线", orderTarget: 115000, orderActual: 103571, orderGap: 11429, target: 1000, actual: 1143, gap: -143, shortageToday: 0, shortageTotal: 0, planRate: "96%", outputs: [1450, 0, 786, 960, 1263, 1182, 2033, 2690, 1506, 712] },
-  { factory: "黄岛烟机", line: "总装C线", orderTarget: 115000, orderActual: 103571, orderGap: 11429, target: 2000, actual: 1854, gap: 146, shortageToday: 0, shortageTotal: 0, planRate: "96%", outputs: [2042, 0, 2164, 1731, 0, 0, 0, 0, 0, 1680] },
-];
+const lineRows = dashboardData.lineRows;
 
-const weeklyPreview = [
-  { factory: "黄岛烟机", line: "烟机小计", d1: 3430, d2: 0, d3: 2548, d4: 2841, d5: 2764, d6: 2375, d7: 0, total: 13958, month: 103595, balance: 56254 },
-  { factory: "黄岛烤箱", line: "烤箱小计", d1: 264, d2: 0, d3: 1313, d4: 1342, d5: 753, d6: 841, d7: 0, total: 4513, month: 21314, balance: 677 },
-  { factory: "烟台厨电", line: "厨电小计", d1: 11000, d2: 0, d3: 3960, d4: 5483, d5: 4842, d6: 4891, d7: 0, total: 30176, month: 158902, balance: 93243 },
-  { factory: "黄岛洗碗机", line: "洗碗机小计", d1: 300, d2: 0, d3: 3095, d4: 3742, d5: 3596, d6: 3730, d7: 3267, total: 26353, month: 82604, balance: 7312 },
-];
+const weeklyPreview = dashboardData.weeklyPreview;
 
-const delayPreview = [
-  { factory: "黄岛烟机", category: "烟机", code: "FC54M3000", desc: "CXW-358-C2917UD", week: 146, total: 146, reason: "物料原因", material: "0231401048B/玻璃/新利德玻璃原片", progress: "-" },
-  { factory: "黄岛烟机", category: "烟机", code: "FC5300000", desc: "CXW-258-C2T90EG", week: 80, total: 100, reason: "小单集中生产", material: "-", progress: "-" },
-  { factory: "烟台厨电", category: "烟机", code: "FC54GH000", desc: "CXW-358-E900C61MaxUD", week: 435, total: 435, reason: "技改影响", material: "云板玻璃技改", progress: "W27生产" },
-  { factory: "黄岛洗碗机", category: "洗碗机", code: "FA0974000", desc: "EYBW20566GHU1", week: 1600, total: 1600, reason: "物料原因", material: "日亮搁架差异1000", progress: "7月3日到货" },
-];
+const delayPreview = dashboardData.delayPreview;
 
 const moduleTabs = [
   { key: "overview", label: "总驾驶舱", ledgerKey: "production", headline: "风险作战室", value: "闭环5步", tone: "blue" },
@@ -98,16 +73,7 @@ const reportNarratives = [
   "降费逻辑：通过订单均衡生产，抑制人员分流损失和加班费，支撑成本改善。",
 ];
 
-const factoryPerformance = [
-  { name: "黄岛洗碗机", targetWan: 9.5, actualWan: 8.26, gapWan: 1.24, complete: 87, dayTarget: 3600, dayActual: 3304, dayGap: 296, shortage: 364, status: "高风险", lines: ["H20线", "H10线", "新班次", "GE线", "抽屉线"], tone: "danger" },
-  { name: "黄岛烟机", targetWan: 11.5, actualWan: 10.36, gapWan: 1.14, complete: 90, dayTarget: 3600, dayActual: 3463, dayGap: 137, shortage: 0, status: "关注", lines: ["总装A线", "总装B线", "总装C线"], tone: "warn" },
-  { name: "黄岛烤箱", targetWan: 2.5, actualWan: 2.36, gapWan: 0.14, complete: 94, dayTarget: 1700, dayActual: 1562, dayGap: 138, shortage: 138, status: "高风险", lines: ["烤箱线-白班", "烤箱线-夜班"], tone: "danger" },
-  { name: "烟台厨电", targetWan: 15.9, actualWan: 15.2, gapWan: 0.7, complete: 96, dayTarget: 5200, dayActual: 4864, dayGap: 336, shortage: 0, status: "稳定", lines: ["灶具A线", "灶具B线", "烟机A线"], tone: "good" },
-  { name: "重庆厨电", targetWan: 3.6, actualWan: 3.32, gapWan: 0.28, complete: 92, dayTarget: 1800, dayActual: 1670, dayGap: 130, shortage: 0, status: "关注", lines: ["洗碗机A线", "灶具线"], tone: "warn" },
-  { name: "土耳其", targetWan: 0, actualWan: 0, gapWan: 0, complete: 0, dayTarget: 0, dayActual: 0, dayGap: 0, shortage: 0, status: "预留", lines: [], tone: "empty", pending: true },
-  { name: "印度", targetWan: 0, actualWan: 0, gapWan: 0, complete: 0, dayTarget: 0, dayActual: 0, dayGap: 0, shortage: 0, status: "预留", lines: [], tone: "empty", pending: true },
-  { name: "巴基斯坦", targetWan: 0, actualWan: 0, gapWan: 0, complete: 0, dayTarget: 0, dayActual: 0, dayGap: 0, shortage: 0, status: "预留", lines: [], tone: "empty", pending: true },
-];
+const factoryPerformance = dashboardData.factoryPerformance;
 
 const factoryImages = new Map([
   [factoryPerformance[0]?.name, "casarte-ai-dishwasher.jpg"],
@@ -135,19 +101,7 @@ function factoryImageSrc(factory) {
   return `${import.meta.env.BASE_URL}product-images/${factoryImages.get(factory.name) || "pending-global.jpg"}`;
 }
 
-const dailyPerformanceRows = [
-  ...lineRows,
-  { factory: "黄岛烟机", line: "烟机小计", orderTarget: 115000, orderActual: 103571, orderGap: 11429, target: 3600, actual: 3463, gap: 137, shortageToday: 0, shortageTotal: 0, planRate: "96%", outputs: [4350, 0, 2950, 2691, 1263, 1184, 2353, 3040, 1806, 2845], subtotal: true },
-  { factory: "黄岛烤箱", line: "烤箱线-白班", orderTarget: 25000, orderActual: 23620, orderGap: 1380, target: 850, actual: 781, gap: 69, shortageToday: 0, shortageTotal: 69, planRate: "70%", outputs: [264, 0, 413, 450, 434, 446, 0, 0, 0, 0] },
-  { factory: "黄岛烤箱", line: "烤箱线-夜班", orderTarget: 25000, orderActual: 23620, orderGap: 1380, target: 850, actual: 781, gap: 69, shortageToday: 0, shortageTotal: 69, planRate: "70%", outputs: [0, 0, 900, 892, 319, 395, 0, 0, 0, 0] },
-  { factory: "黄岛烤箱", line: "烤箱小计", orderTarget: 25000, orderActual: 23620, orderGap: 1380, target: 1700, actual: 1562, gap: 138, shortageToday: 0, shortageTotal: 138, planRate: "70%", outputs: [264, 0, 1313, 1342, 753, 841, 0, 0, 0, 0], subtotal: true },
-  { factory: "烟台厨电", line: "厨电小计", orderTarget: 159000, orderActual: 152000, orderGap: 7000, target: 5200, actual: 4864, gap: 336, shortageToday: 0, shortageTotal: 0, planRate: "96%", outputs: [11000, 0, 3960, 5483, 4842, 4891, 0, 0, 0, 0], subtotal: true },
-  { factory: "烟台厨电", line: "灶具B线", orderTarget: 159000, orderActual: 152000, orderGap: 7000, target: 2600, actual: 2428, gap: 172, shortageToday: 0, shortageTotal: 0, planRate: "96%", outputs: [2300, 0, 1270, 2600, 2142, 2200, 0, 0, 0, 0] },
-  { factory: "烟台厨电", line: "灶具自动化线", orderTarget: 159000, orderActual: 152000, orderGap: 7000, target: 2600, actual: 2436, gap: 164, shortageToday: 0, shortageTotal: 0, planRate: "96%", outputs: [5000, 0, 0, 0, 0, 0, 0, 0, 0, 0] },
-  { factory: "重庆厨电", line: "洗碗机A线", orderTarget: 36000, orderActual: 33200, orderGap: 2800, target: 900, actual: 835, gap: 65, shortageToday: 0, shortageTotal: 0, planRate: "92%", outputs: [0, 0, 803, 900, 880, 842, 0, 0, 0, 0] },
-  { factory: "重庆厨电", line: "灶具线", orderTarget: 36000, orderActual: 33200, orderGap: 2800, target: 900, actual: 835, gap: 65, shortageToday: 0, shortageTotal: 0, planRate: "92%", outputs: [0, 0, 982, 760, 960, 880, 0, 0, 0, 0] },
-  { factory: "重庆厨电", line: "重庆厨电小计", orderTarget: 36000, orderActual: 33200, orderGap: 2800, target: 1800, actual: 1670, gap: 130, shortageToday: 0, shortageTotal: 0, planRate: "92%", outputs: [0, 0, 1785, 1660, 1840, 1722, 0, 0, 0, 0], subtotal: true },
-];
+const dailyPerformanceRows = dashboardData.dailyPerformanceRows;
 
 const factoryOrder = new Map(factoryPerformance.map((factory, index) => [factory.name, index]));
 
@@ -590,13 +544,12 @@ function FactoryPerformanceDock({ selectedFactory, onSelectFactory }) {
             <div className="factory-card-copy">
               <span>{factory.status}</span>
               <strong>{factory.name}</strong>
-              <p>{factoryProductNames.get(factory.name) || "产品图"}</p>
               {factory.pending ? (
-                <p>待接入 ? 预留产能接口</p>
+                <p>待接入 · 预留产能接口</p>
               ) : (
                 <>
                   <div className="factory-main-number">{factory.actualWan.toFixed(2)}万</div>
-                  <p>目标 {factory.targetWan.toFixed(2)}万 ? 差异 {factory.gapWan.toFixed(2)}万</p>
+                  <p>目标 {factory.targetWan.toFixed(2)}万 · 差异 {factory.gapWan.toFixed(2)}万</p>
                   <i style={{ "--complete": `${factory.complete}%` }} />
                 </>
               )}
