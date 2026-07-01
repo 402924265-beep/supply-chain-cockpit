@@ -109,6 +109,32 @@ const factoryPerformance = [
   { name: "巴基斯坦", targetWan: 0, actualWan: 0, gapWan: 0, complete: 0, dayTarget: 0, dayActual: 0, dayGap: 0, shortage: 0, status: "预留", lines: [], tone: "empty", pending: true },
 ];
 
+const factoryImages = new Map([
+  [factoryPerformance[0]?.name, "casarte-ai-dishwasher.jpg"],
+  [factoryPerformance[1]?.name, "casarte-ai-hood.jpg"],
+  [factoryPerformance[2]?.name, "casarte-ai-oven.jpg"],
+  [factoryPerformance[3]?.name, "casarte-ai-stove.jpg"],
+  [factoryPerformance[4]?.name, "haier-countertop-dishwasher.jpg"],
+  [factoryPerformance[5]?.name, "pending-global.jpg"],
+  [factoryPerformance[6]?.name, "pending-global.jpg"],
+  [factoryPerformance[7]?.name, "pending-global.jpg"],
+]);
+
+const factoryProductNames = new Map([
+  [factoryPerformance[0]?.name, "指挥家AI洗碗机"],
+  [factoryPerformance[1]?.name, "指挥家AI之眼油烟机"],
+  [factoryPerformance[2]?.name, "指挥家C7 AI之眼烤箱"],
+  [factoryPerformance[3]?.name, "指挥家AI灶具"],
+  [factoryPerformance[4]?.name, "台式洗碗机"],
+  [factoryPerformance[5]?.name, "海外生产待上线"],
+  [factoryPerformance[6]?.name, "海外生产待上线"],
+  [factoryPerformance[7]?.name, "海外生产待上线"],
+]);
+
+function factoryImageSrc(factory) {
+  return `${import.meta.env.BASE_URL}product-images/${factoryImages.get(factory.name) || "pending-global.jpg"}`;
+}
+
 const dailyPerformanceRows = [
   ...lineRows,
   { factory: "黄岛烟机", line: "烟机小计", orderTarget: 115000, orderActual: 103571, orderGap: 11429, target: 3600, actual: 3463, gap: 137, shortageToday: 0, shortageTotal: 0, planRate: "96%", outputs: [4350, 0, 2950, 2691, 1263, 1184, 2353, 3040, 1806, 2845], subtotal: true },
@@ -560,17 +586,21 @@ function FactoryPerformanceDock({ selectedFactory, onSelectFactory }) {
             className={`factory-card ${factory.tone} ${selectedFactory.name === factory.name ? "active" : ""}`}
             onClick={() => onSelectFactory(factory)}
           >
-            <span>{factory.status}</span>
-            <strong>{factory.name}</strong>
-            {factory.pending ? (
-              <p>待接入 · 预留产能接口</p>
-            ) : (
-              <>
-                <div className="factory-main-number">{factory.actualWan.toFixed(2)}万</div>
-                <p>目标 {factory.targetWan.toFixed(2)}万 · 差异 {factory.gapWan.toFixed(2)}万</p>
-                <i style={{ "--complete": `${factory.complete}%` }} />
-              </>
-            )}
+            <img className="factory-product-thumb" src={factoryImageSrc(factory)} alt={factoryProductNames.get(factory.name) || factory.name} />
+            <div className="factory-card-copy">
+              <span>{factory.status}</span>
+              <strong>{factory.name}</strong>
+              <p>{factoryProductNames.get(factory.name) || "产品图"}</p>
+              {factory.pending ? (
+                <p>待接入 ? 预留产能接口</p>
+              ) : (
+                <>
+                  <div className="factory-main-number">{factory.actualWan.toFixed(2)}万</div>
+                  <p>目标 {factory.targetWan.toFixed(2)}万 ? 差异 {factory.gapWan.toFixed(2)}万</p>
+                  <i style={{ "--complete": `${factory.complete}%` }} />
+                </>
+              )}
+            </div>
           </button>
         ))}
       </div>
@@ -584,6 +614,7 @@ function FactoryDetailStage({ factory, selectedLine, setSelectedLine }) {
   return (
     <section className={`panel factory-stage ${factory.pending ? "pending" : ""}`} key={factory.name}>
       <div className="stage-header">
+        <img className="stage-product-thumb" src={factoryImageSrc(factory)} alt={factoryProductNames.get(factory.name) || factory.name} />
         <div>
           <span>动态展示区</span>
           <h2>{factory.name}</h2>
