@@ -1663,13 +1663,14 @@ table {
   position: relative;
   z-index: 1;
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 9px;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  gap: 10px;
 }
 
 .factory-line-cloud button {
-  min-height: 72px;
-  padding: 10px;
+  min-width: 0;
+  min-height: 78px;
+  padding: 11px 12px;
   text-align: left;
   color: var(--text);
 }
@@ -1681,14 +1682,19 @@ table {
 
 .factory-line-cloud span {
   display: block;
+  overflow: hidden;
   color: var(--muted);
   font-size: 12px;
+  line-height: 1.25;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .factory-line-cloud strong {
   display: block;
   margin-top: 5px;
-  font-size: 18px;
+  font-size: 17px;
+  line-height: 1.15;
 }
 
 .factory-line-cloud i {

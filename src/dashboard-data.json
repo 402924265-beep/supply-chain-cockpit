@@ -35,7 +35,7 @@
     },
     {
       "label": "T-1计划 / 实际",
-      "value": "18296 / 16554台",
+      "value": "1.8万 / 1.7万",
       "sub": "当日差异1741台，累计欠产203台",
       "tone": "amber",
       "icon": "CalendarCheck"

@@ -80,7 +80,7 @@ const factoryImages = new Map([
   [factoryPerformance[1]?.name, "casarte-ai-hood.jpg"],
   [factoryPerformance[2]?.name, "casarte-ai-oven.jpg"],
   [factoryPerformance[3]?.name, "casarte-ai-stove.jpg"],
-  [factoryPerformance[4]?.name, "haier-countertop-dishwasher.jpg"],
+  [factoryPerformance[4]?.name, "haier-built-in-dishwasher.jpg"],
   [factoryPerformance[5]?.name, "pending-global.jpg"],
   [factoryPerformance[6]?.name, "pending-global.jpg"],
   [factoryPerformance[7]?.name, "pending-global.jpg"],
@@ -123,6 +123,24 @@ function ChartTooltip({ active, payload, label }) {
         <span key={item.name} style={{ color: item.color }}>{item.name}: {item.value}</span>
       ))}
     </div>
+  );
+}
+
+function ActualValueLabel({ x, y, width, value, payload }) {
+  if (!value) return null;
+  const nearTarget = payload?.target && value >= payload.target * 0.9;
+  const labelY = nearTarget ? y + 17 : Math.max(12, y - 7);
+  return (
+    <text
+      x={x + width / 2}
+      y={labelY}
+      textAnchor="middle"
+      fill={nearTarget ? "#ffffff" : "#dff5ff"}
+      fontSize={10}
+      fontWeight={900}
+    >
+      {value}
+    </text>
   );
 }
 
@@ -214,7 +232,7 @@ function OverviewPage({ setActiveTab, selectedLine, setSelectedLine }) {
                 ["04", "产能规划", "7-9月供需缺口与爬坡", "419万→505万"],
                 ["05", "任务闭环", "责任人、期限、会议决议", "高风险3项"],
               ].map((step) => (
-                <button key={step[0]} className="flow-step" onClick={() => setActiveTab(step[0] === "01" ? "daily" : step[0] === "03" ? "weekly" : step[0] === "04" ? "capacity" : "tasks")}>
+                <button key={step[0]} className="flow-step" onClick={() => setActiveTab(step[0] === "01" ? "daily" : step[0] === "02" ? "shortage" : step[0] === "03" ? "weekly" : step[0] === "04" ? "capacity" : "tasks")}>
                   <span>{step[0]}</span>
                   <strong>{step[1]}</strong>
                   <p>{step[2]}</p>
@@ -470,12 +488,10 @@ function TrendWall({ selected }) {
           <YAxis tick={{ fill: "#8aa9ca", fontSize: 11 }} axisLine={false} tickLine={false} />
           <Tooltip content={<ChartTooltip />} />
           <Bar dataKey="actual" name="实际" radius={[5, 5, 0, 0]}>
-            <LabelList dataKey="actual" position="top" fill="#dff5ff" fontSize={11} />
+            <LabelList dataKey="actual" content={<ActualValueLabel />} />
             {data.map((item) => <Cell key={item.date} fill={item.actual >= item.target ? "#43e39d" : "#3aa8ff"} />)}
           </Bar>
-          <Line dataKey="target" name="目标" stroke="#ffbd45" strokeWidth={3} dot={{ r: 3, fill: "#ffbd45" }}>
-            <LabelList dataKey="target" position="top" fill="#ffbd45" fontSize={10} />
-          </Line>
+          <Line dataKey="target" name="目标" stroke="#ffbd45" strokeWidth={3} dot={{ r: 3, fill: "#ffbd45" }} />
         </ComposedChart>
       </ResponsiveContainer>
     </section>
@@ -737,6 +753,73 @@ function DailyLedger({ selectedLine }) {
   );
 }
 
+function ShortagePage({ setActiveTab }) {
+  const shortageRows = sortDailyRows(dailyPerformanceRows.filter((row) => (row.gap || 0) > 0 || (row.shortageToday || 0) > 0 || (row.shortageTotal || 0) > 0));
+  const totalToday = shortageRows.reduce((sum, row) => sum + Number(row.shortageToday || 0), 0);
+  const totalShortage = shortageRows.filter((row) => row.subtotal).reduce((sum, row) => sum + Number(row.shortageTotal || 0), 0);
+  const totalGap = shortageRows.filter((row) => row.subtotal).reduce((sum, row) => sum + Math.max(0, Number(row.gap || 0)), 0);
+  return (
+    <section className="sheet-page">
+      <div className="sheet-return-bar">
+        <button onClick={() => setActiveTab("overview")}>返回总驾驶舱</button>
+        <span>欠产明细 / 差异归因</span>
+      </div>
+      <div className="sheet-hero panel shortage-hero">
+        <div>
+          <span>差异归因</span>
+          <h2>欠产明细</h2>
+          <p>按工厂、线体展开日产差异、当日欠产、累计欠产和清单率，优先处理欠产与差异双高项。</p>
+        </div>
+        <strong>{formatNumber(totalShortage)}台</strong>
+      </div>
+      <section className="panel generic-summary">
+        <div className="panel-head">
+          <div>
+            <h2>欠产总览</h2>
+            <p>来自 7月1日生产日清表，点击总驾驶舱差异归因卡进入。</p>
+          </div>
+          <WarningCircle weight="duotone" />
+        </div>
+        <div className="metric-row">
+          <div><span>涉及线体</span><strong>{shortageRows.length}</strong></div>
+          <div><span>当日欠产</span><strong>{formatNumber(totalToday)}台</strong></div>
+          <div><span>日产差异</span><strong>{formatNumber(totalGap)}台</strong></div>
+        </div>
+      </section>
+      <section className="panel ledger-panel">
+        <div className="panel-head">
+          <div>
+            <h2>欠产线体明细</h2>
+            <p>差异和欠产用颜色标识，优先看小计行与累计欠产列。</p>
+          </div>
+          <Table weight="duotone" />
+        </div>
+        <div className="ledger-scroll">
+          <table>
+            <thead>
+              <tr><th>工厂</th><th>线体</th><th>日产目标</th><th>日产实际</th><th>日产差异</th><th>当日欠产</th><th>累计欠产</th><th>清单率</th></tr>
+            </thead>
+            <tbody>
+              {shortageRows.map((row) => (
+                <tr className={row.subtotal ? "subtotal" : ""} key={`${row.factory}-${row.line}-shortage`}>
+                  <td>{row.factory}</td>
+                  <td>{row.line}</td>
+                  <td>{formatNumber(row.target)}</td>
+                  <td>{formatNumber(row.actual)}</td>
+                  <td className={varianceTone(row.gap)}>{row.gap > 0 ? "+" : ""}{formatNumber(row.gap)}</td>
+                  <td className={row.shortageToday ? "danger" : ""}>{row.shortageToday || "-"}</td>
+                  <td className={row.shortageTotal ? "warn" : ""}>{row.shortageTotal || "-"}</td>
+                  <td>{row.planRate || "-"}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </section>
+  );
+}
+
 function SheetPage({ tab, setActiveTab }) {
   const ledger = rawLedgers[tab.ledgerKey];
   const previewData = tab.key === "weekly" ? weeklyPreview : tab.key === "delay" ? delayPreview : null;
@@ -904,6 +987,8 @@ export function App() {
         <OverviewPage setActiveTab={setActiveTab} selectedLine={selectedLine} setSelectedLine={setSelectedLine} />
       ) : activeTab === "daily" ? (
         <DailyPage selectedLine={selectedLine} setSelectedLine={setSelectedLine} setActiveTab={setActiveTab} />
+      ) : activeTab === "shortage" ? (
+        <ShortagePage setActiveTab={setActiveTab} />
       ) : (
         <SheetPage tab={activeModule} setActiveTab={setActiveTab} />
       )}
