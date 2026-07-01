@@ -86,17 +86,6 @@ const factoryImages = new Map([
   [factoryPerformance[7]?.name, "pending-global.jpg"],
 ]);
 
-const factoryProductNames = new Map([
-  [factoryPerformance[0]?.name, "指挥家AI洗碗机"],
-  [factoryPerformance[1]?.name, "指挥家AI之眼油烟机"],
-  [factoryPerformance[2]?.name, "指挥家C7 AI之眼烤箱"],
-  [factoryPerformance[3]?.name, "指挥家AI灶具"],
-  [factoryPerformance[4]?.name, "台式洗碗机"],
-  [factoryPerformance[5]?.name, "海外生产待上线"],
-  [factoryPerformance[6]?.name, "海外生产待上线"],
-  [factoryPerformance[7]?.name, "海外生产待上线"],
-]);
-
 function factoryImageSrc(factory) {
   return `${import.meta.env.BASE_URL}product-images/${factoryImages.get(factory.name) || "pending-global.jpg"}`;
 }
@@ -540,7 +529,7 @@ function FactoryPerformanceDock({ selectedFactory, onSelectFactory }) {
             className={`factory-card ${factory.tone} ${selectedFactory.name === factory.name ? "active" : ""}`}
             onClick={() => onSelectFactory(factory)}
           >
-            <img className="factory-product-thumb" src={factoryImageSrc(factory)} alt={factoryProductNames.get(factory.name) || factory.name} />
+            <img className="factory-product-thumb" src={factoryImageSrc(factory)} alt={factory.name} />
             <div className="factory-card-copy">
               <span>{factory.status}</span>
               <strong>{factory.name}</strong>
@@ -567,7 +556,7 @@ function FactoryDetailStage({ factory, selectedLine, setSelectedLine }) {
   return (
     <section className={`panel factory-stage ${factory.pending ? "pending" : ""}`} key={factory.name}>
       <div className="stage-header">
-        <img className="stage-product-thumb" src={factoryImageSrc(factory)} alt={factoryProductNames.get(factory.name) || factory.name} />
+        <img className="stage-product-thumb" src={factoryImageSrc(factory)} alt={factory.name} />
         <div>
           <span>动态展示区</span>
           <h2>{factory.name}</h2>
